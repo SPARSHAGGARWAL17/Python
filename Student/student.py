@@ -3,9 +3,7 @@ import psycopg2
 
 # FILE FOR USERNAME AND PASSWORD
 import sec
-global tname;
-tname=[]
-global tno;
+
 
 def columnname():
     while True:
@@ -50,7 +48,6 @@ def table(cur ,conn):
     colname = []
     datatype = []
     name = input('Enter name for table: ')
-    tname.append(name)
     colno = int(input('Enter number of Columns: '))
     for i in range(colno):
         coname, dt = columnname()
@@ -80,6 +77,8 @@ def display(cur,conn):
         data1 = cur.fetchall()
         displaytable(col,data1,cur,conn)
     except Exception as e:
+        cur.execute('ROLLBACK')
+        conn.commit()
         print('NO database. \n ')
 
 def getdata(cur,conn):
@@ -96,6 +95,8 @@ def getdata(cur,conn):
             data.append(row[i][7])
         return(col,data,name)
     except:
+        cur.execute('ROLLBACK')
+        conn.commit()
         print('Invalid input!')
         return (None,None,None)
 
@@ -121,6 +122,8 @@ def insert(cur,conn):
             print(values)
             break
         except:
+            cur.execute('ROLLBACK')
+            conn.commit()
             print('Invalid table name!')
 def operation(string,cur,conn):
     col,data,name = getdata(cur,conn)
@@ -140,6 +143,8 @@ def operation(string,cur,conn):
                 displaytable(col,data1,cur,conn)
                 break
             except:
+                cur.execute('ROLLBACK')
+                conn.commit()
                 print('Error!')
     elif string == 'delete':
         while True:
@@ -155,6 +160,8 @@ def operation(string,cur,conn):
                 display(cur,conn)
                 break
             except:
+                cur.execute('ROLLBACK')
+                conn.commit()
                 print('Error!')
 
 print("----------------------------------------")
