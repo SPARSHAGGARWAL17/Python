@@ -1,3 +1,4 @@
+from typing import ValuesView
 import psycopg2
 
 # FILE FOR USERNAME AND PASSWORD
@@ -38,18 +39,6 @@ def switchdt(a):
     return switch[a]
 
 
-def menu(v):
-    print(v)
-    switch = {
-        1: table(cur,conn),
-        2: display(cur,conn),
-        3: '',
-        4: '',
-        5: '',
-        6: exit
-    }
-    
-    switch[v]
 
 def table(cur ,conn):
     colname = []
@@ -67,35 +56,72 @@ def table(cur ,conn):
     createtable(colname, datatype, name, cur, conn)
     print('Table and Columns Created.')
 
+def displaytable(row,cur,conn):
+    print('==================================================================')
+    for i in range(len(row)):
+        print(row[i][3].ljust(20, ' '), end=' |')
+    print('\n==================================================================')
+    cur.execute(''' SELECT * FROM student;''')
+    conn.commit()
+    data = cur.fetchall()
+    for i in data:
+        for j in i:
+            print(str(j).ljust(20, ' '), end=' |')
+        print('\n')
+    print('==================================================================')
 
 def display(cur,conn):
     try:
         cur.execute(f'''SELECT * FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_NAME = student;''')
+                    WHERE TABLE_NAME = 'student';''')
         conn.commit()
         row = cur.fetchall()
-        col = []
-        print('==================================================================')
-        for i in range(len(row)):
-            print(row[i][3].ljust(20,' '),end=' |')
-        print('\n==================================================================')
-        cur.execute(''' SELECT * FROM students;''')
-        conn.commit()
-        data = cur.fetchall()
-        for i in data:
-            
-            for j in i:
-                print(str(j).ljust(20, ' '), end=' |')
-        print('\n==================================================================')
+        name = input('Enter name of the table: ')
+        displaytable(row,cur,conn)
     except Exception as e:
         print('NO database. \n ')
 
+def getdata(cur,conn):
+    try:
+        name = input('Enter name of table: ')
+        cur.execute(f'''SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+                        WHERE TABLE_NAME = '{name}';''')
+        conn.commit()
+        row = cur.fetchall()
+        col = []
+        data = []
+        for i in range(len(row)):
+            col.append(row[i][3])
+            data.append(row[i][7])
+        return(col,data)
+    except:
+        print('Invalid input!')
+        return (None,None)
 
 def insert(cur,conn):
-    name = input('Enter name of the table to insert:  ')
     while True:
-        if name in tname:
-            pass
+        try:
+            col,data = getdata(cur,conn)
+            if col == None:
+                continue
+            inputs=[]
+            for i in range(len(col)):
+                in1 = input(f'Enter value for {col[i]}: ')
+                if data[i]=='integer':
+                    inputs.append(f"{in1}")
+                else:
+                    inputs.append(f"\'{in1}\'")
+            record = ','.join(col)
+            values = ','.join(inputs)
+            cur.execute(f'''INSERT INTO student ({record})
+                            VALUES ({values})''')
+            conn.commit()
+            print(values)
+            break
+        except:
+            print('Invalid table name!')
+def operation(string,conn,cur):
+    name = input('Enter table name: ')
 
 
 print("----------------------------------------")
@@ -115,7 +141,7 @@ if choice ==1:
 elif(choice==2):
     display(cur,conn)
 elif(choice==3):
-    pass
+    insert(cur,conn)
 elif(choice==4):
     pass
 elif(choice==5):
