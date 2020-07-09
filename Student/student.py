@@ -126,9 +126,10 @@ def insert(cur,conn):
             conn.commit()
             print('Invalid table name!')
 def operation(string,cur,conn):
-    col,data,name = getdata(cur,conn)
+    
     if string == 'search':
         while True:
+            col, data, name = getdata(cur, conn)
             try:
                 for i in range(len(col)):
                     print(f'{i+1}. {string} by {col[i]}')
@@ -146,8 +147,10 @@ def operation(string,cur,conn):
                 cur.execute('ROLLBACK')
                 conn.commit()
                 print('Error!')
+                continue
     elif string == 'delete':
         while True:
+            col, data, name = getdata(cur, conn)
             try:
                 for i in range(len(col)):
                     print(f'{i+1}. {string} by {col[i]}')
@@ -163,6 +166,7 @@ def operation(string,cur,conn):
                 cur.execute('ROLLBACK')
                 conn.commit()
                 print('Error!')
+                continue
 
 print("----------------------------------------")
 print('~ WELCOME TO STUDENT MANAGEMENT SYSTEM ~')
