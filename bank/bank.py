@@ -58,7 +58,7 @@ def login():
             name = sheet.cell(login[1],_name).value
             print('Hello, ',name.upper())
             while True:
-                choice = input('Enter your choice: \n 1. Transactions \n 2. Transfer \n 3. Logout : ')
+                choice = input('Enter your choice: \n 1. Transactions \n 2. Transfer \n 3. Delete Account \n 4. Logout : ')
                 if choice == '1':
                     transact(login)
                     continue
@@ -66,6 +66,10 @@ def login():
                     transfer(login)
                     continue
                 elif choice =='3':
+                    delete(login)
+                    print('Account Deleted Successfully!')
+                    break
+                elif choice == '4':
                     break
                 else:
                     print('Invalid Choice')
@@ -142,6 +146,19 @@ def transfer(login):
                 continue
         except:
             print('Invalid acc.')
+def delete(login):
+    while True:
+        choice = input('Are you sure to delete your account? [Y/N] ').lower()
+        if choice == 'y':
+            sheet.cell(login[1],_acc).value = None
+            sheet.cell(login[1],_pas).value = None
+            sheet.cell(login[1],_name).value = None
+            sheet.cell(login[1],_amount).value = None
+            break
+        elif choice == 'n':
+            break
+        else:
+            continue
 print('===========================')
 print('  ~ WELCOME TO THE BANK ~  ')
 print('===========================')
