@@ -1,6 +1,5 @@
 import random
 import string
-from sys import setprofile 
 import openpyxl as op
 # file name goes here
 file = 'data.xlsx'
@@ -51,7 +50,7 @@ def login():
             acc = sheet.cell(i,_acc).value
             pas = sheet.cell(i,_pas).value
             if account_no == str(acc):
-                if password == pas:
+                if password == str(pas):
                     login = (True,i)
                     break
         if login[0]:
@@ -83,7 +82,7 @@ def transact(login):
         if choice =='1':
             while True:
                 try:
-                    deposit = int(input('Enter amount to Deposit : '))
+                    deposit = int(input('Enter amount to Deposit or enter (0) to go back : '))
                     sheet.cell(login[1],_amount).value = amount+deposit
                     print('Deposited Successfully.')
                     print("Amount Available : ",amount+deposit)
@@ -96,7 +95,7 @@ def transact(login):
         elif choice == '2':
             while True:
                 try:
-                    withdraw = int(input("Enter amount to Withdraw : ")) 
+                    withdraw = int(input("Enter amount to Withdraw or enter (0) to go back : ")) 
                     if 0 <= withdraw < amount :
                         sheet.cell(login[1],_amount).value = amount-withdraw
                         print('Withdraw Successful!')
@@ -119,8 +118,10 @@ def transfer(login):
             account_no = int(input('Enter account number to Transfer : '))
             for i in range(1,row):
                 acc = sheet.cell(i,_acc).value
+                name = sheet.cell(i,_name).value
                 if str(account_no) == str(acc):
                     print("BANK USER FOUND!")
+                    print('Bank User : ',name.upper())
                     user = (True,i)
             if user[0]:
                 while True:
