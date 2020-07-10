@@ -1,23 +1,24 @@
 import random
 import string
 import openpyxl as op
+import getpass
 # file name goes here
 file = 'data.xlsx'
-workbook = op.load_workbook(file)
-sheet = workbook['Sheet1']
 _acc = 1
 _name = 2
 _pas = 3
 _amount = 4
-row = sheet.max_row+1
-col = sheet.max_column
-
+def workbooks():
+    workbook = op.load_workbook(file)
+    sheet = workbook['Sheet1']
+    row = sheet.max_row+1
+    return(workbook,sheet,row)
 def create_account():
+    workbook,sheet,row = workbooks()
     account_list = []
     for i in range(1,row):
         cell = sheet.cell(i,1)
         account_list.append(cell)
-    print(row,col)
     print('~ Create Account in Bank. ~')
     name = input('Enter your name : ')
     letters = string.ascii_letters
@@ -41,11 +42,12 @@ def create_account():
     print('-----------------------------------')
     workbook.save(file)
 def login():
+    workbook,sheet,row = workbooks()
     print('~ Enter details to login ~')
     while True:
         login = (False,)
         account_no = input('Enter your Account number : ')
-        password = input('Enter Password : ')
+        password = getpass.getpass('Enter password : ','*')
         for i in range(1,row):
             acc = sheet.cell(i,_acc).value
             pas = sheet.cell(i,_pas).value
@@ -55,21 +57,28 @@ def login():
                     break
         if login[0]:
             print('Login Successful!')
+            print('-----------------------------------')
             name = sheet.cell(login[1],_name).value
             print('Hello, ',name.upper())
             while True:
-                choice = input('Enter your choice: \n 1. Transactions \n 2. Transfer \n 3. Delete Account \n 4. Logout : ')
+                choice = input('Enter your choice: \n 1. Transactions \n 2. Transfer \n 3. Change Password \n 4. Delete Account \n 5. Logout : ')
                 if choice == '1':
                     transact(login)
                     continue
                 elif choice =='2':
                     transfer(login)
                     continue
-                elif choice =='3':
+                elif choice == '3':
+                    password = input("Enter new Password : ")
+                    sheet.cell(login[1],_pas).value = password
+                    print('Password Change Successfully!')
+                    print('-----------------------------')
+                    workbook.save(file)
+                elif choice =='4':
                     delete(login)
                     print('Account Deleted Successfully!')
                     break
-                elif choice == '4':
+                elif choice == '5':
                     break
                 else:
                     print('Invalid Choice')
@@ -78,6 +87,7 @@ def login():
             print('Invalid User')
         break
 def transact(login):
+    workbook,sheet,row = workbooks()
     amount = sheet.cell(login[1],_amount).value
     print('-----------------------------------')
     print("Amount Available : ",amount)
@@ -89,6 +99,7 @@ def transact(login):
                     deposit = int(input('Enter amount to Deposit or enter (0) to go back : '))
                     sheet.cell(login[1],_amount).value = amount+deposit
                     print('Deposited Successfully.')
+                    print('-----------------------------------')
                     print("Amount Available : ",amount+deposit)
                     workbook.save(file)
                     break
@@ -103,16 +114,18 @@ def transact(login):
                     if 0 <= withdraw < amount :
                         sheet.cell(login[1],_amount).value = amount-withdraw
                         print('Withdraw Successful!')
+                        print('-----------------------------------')
                         print('Available Amount : ',amount-withdraw)
                         workbook.save(file)
                         break
                     else:
                         print('Invalid Amount!')
-                        continue
+                        break
                 except:
                     print('Invalid Amount!')
             break
 def transfer(login):
+    workbook,sheet,row = workbooks()
     print('-----------------------------------')
     while True:
         amount = sheet.cell(login[1],_amount).value
@@ -138,6 +151,7 @@ def transfer(login):
                 sheet.cell(login[1],_amount).value = amount-amount_user
                 sheet.cell(user[1],_amount).value+=amount_user
                 print('Transfer Successful!')
+                print('-----------------------------------')
                 print('Available Amount : ',amount-amount_user)
                 workbook.save(file)
                 break
@@ -147,6 +161,7 @@ def transfer(login):
         except:
             print('Invalid acc.')
 def delete(login):
+    workbook,sheet,row = workbooks()
     while True:
         choice = input('Are you sure to delete your account? [Y/N] ').lower()
         if choice == 'y':
@@ -154,6 +169,7 @@ def delete(login):
             sheet.cell(login[1],_pas).value = None
             sheet.cell(login[1],_name).value = None
             sheet.cell(login[1],_amount).value = None
+            workbook.save(file)
             break
         elif choice == 'n':
             break
