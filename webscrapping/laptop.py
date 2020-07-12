@@ -4,27 +4,20 @@ import time
 import openpyxl as op
 # FILE NAME GOES HERE
 file = 'data.xlsx'
-workbook = op.load_workbook(file)
-sheet = workbook['Sheet1']
-name = []
-price =[]
-rating = []
 _name = 1
 _price = 2
 _rating = 3
-def driver():
-    browser = webdriver.Chrome('D:\\Work\\Work2\\chromedriver.exe')
-    browser.get('https://www.amazon.in/s?k=laptop&ref=nb_sb_noss')
+data = {}
+data['name'] = []
+data['price'] = []
+data['ratings'] = []
+browser = webdriver.Chrome('D:\\Work\\Work2\\chromedriver.exe')
+browser.get('https://www.amazon.in/s?k=laptop&ref=nb_sb_noss')
+def get_data(data):
     page = browser.page_source
-    soup = BeautifulSoup(page,features='lxml')
-    return soup
-def get_data(soup):
+    soup = BeautifulSoup(page)
     time.sleep(5)
-    data = {}
-    data['name'] = []
-    data['price'] = []
-    data['ratings'] = []
-    for i in soup.findAll(name='div', attrs={'class': 's-include-content-margin s-border-bottom s-latency-cf-section' }):
+    for i in soup.findAll(name='div', attrs={'class': 's-include-content-margin s-border-bottom s-latency-cf-section'}):
         a = i.find(name='span', attrs={
                    'class': 'a-size-medium a-color-base a-text-normal'})
         p = i.find(name='span', attrs={'class': 'a-offscreen'})
@@ -41,14 +34,23 @@ def get_data(soup):
             data['ratings'].append('None')
     print('Data Successfully Scrapped.')
     return(data)
-def load_data(sheet,workbook,data):
-    row = sheet.max_row+1
+def load_data(data):
+    workbook = op.load_workbook(file)
+    sheet = workbook['Sheet1']
+    print(len(data['name']))
     for i in range(len(data['name'])):
-        sheet.cell(row+i,_name).value = data['name'][i]
-        sheet.cell(row+i,_price).value = data['price'][i]
-        sheet.cell(row+i,_rating).value = data['ratings'][i]
+        row = 2+i
+        if sheet.cell(row,_name).value == None:
+            sheet.cell(row,_name).value = data['name'][i]
+            sheet.cell(row,_price).value = data['price'][i]
+            sheet.cell(row,_rating).value = data['ratings'][i]
     workbook.save(file)
+    workbook.close()
     print('File saved Successfully!')
-soup = driver()
-data = get_data(soup)
-load_data(sheet,workbook,data)
+for i in range(5):
+    data = get_data(data)
+    time.sleep(2)
+    print(f'Page {i+1} done.')
+    time.sleep(2)
+    browser.find_element_by_xpath(f'//a[text()="Next"]').click()
+load_data(data)
